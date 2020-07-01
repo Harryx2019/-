@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="数据结构课程设计—公交线路图" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/数据结构课程设计—公交线路图" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/数据结构课程设计—公交线路图" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+		</Compiler>
+		<Unit filename="AddNewBus.cpp" />
+		<Unit filename="AddNewBus.h" />
+		<Unit filename="AddNewRoute.cpp" />
+		<Unit filename="AddNewRoute.h" />
+		<Unit filename="AddNewStation.cpp" />
+		<Unit filename="AddNewStation.h" />
+		<Unit filename="ChangeBus.cpp" />
+		<Unit filename="ChangeBus.h" />
+		<Unit filename="ChangeRoute.cpp" />
+		<Unit filename="ChangeRoute.h" />
+		<Unit filename="ChangeStation.cpp" />
+		<Unit filename="ChangeStation.h" />
+		<Unit filename="HandleFile.cpp" />
+		<Unit filename="HandleFile.h" />
+		<Unit filename="LoadMapData.cpp" />
+		<Unit filename="LoadMapData.h" />
+		<Unit filename="RemoveBus.cpp" />
+		<Unit filename="RemoveBus.h" />
+		<Unit filename="RemoveRoute.cpp" />
+		<Unit filename="RemoveRoute.h" />
+		<Unit filename="RemoveStation.cpp" />
+		<Unit filename="RemoveStation.h" />
+		<Unit filename="ResetSystem.cpp" />
+		<Unit filename="ResetSystem.h" />
+		<Unit filename="SearchBus.cpp" />
+		<Unit filename="SearchBus.h" />
+		<Unit filename="SearchRoute.cpp" />
+		<Unit filename="SearchRoute.h" />
+		<Unit filename="SearchStation.cpp" />
+		<Unit filename="SearchStation.h" />
+		<Unit filename="Stack.cpp" />
+		<Unit filename="Stack.h" />
+		<Unit filename="main.cpp" />
+		<Unit filename="model.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

@@ -1,0 +1,90 @@
+typedef struct Path
+{
+    Route r[MaxSize];
+    int transfer;
+    int distance;
+    int top;
+}Path;
+
+//初始化线路函数;
+void Init(Path *&p,char *s)
+{
+    p=(Path*)malloc(sizeof(Path));
+    p->r[0].bus=-1;
+    p->r[0].distance=0;
+    p->r[0].next=NULL;
+    p->r[0].station=FindStation(s);
+    p->transfer=-1;
+    visited[FindStation(s)]=true;
+    p->top=0;
+}
+
+//增加换乘线路函数
+void Push(Path *&p,Route*s)
+{
+    if(p->r[p->top].bus!=s->bus)
+        p->transfer++;//线路不同，则增加transfer值，说明换乘的公交线路数变多了
+    p->top++;
+    p->r[p->top].bus=s->bus;
+    p->r[p->top].distance=s->distance;
+    p->r[p->top].next=s->next;
+    p->r[p->top].station=s->station;
+    p->distance+=s->distance;
+}
+
+//去除一条换乘线路的函数
+void Pop(Path *&p,Route*&s)
+{
+    s=(Route*)malloc(sizeof(Route));
+    s->bus=p->r[p->top].bus;
+    s->distance=p->r[p->top].distance;
+    s->next=p->r[p->top].next;
+    s->station=p->r[p->top].station;
+    p->distance-=s->distance;
+    p->top--;
+    if(p->r[p->top].bus!=s->bus)//如果去除的公交线路与top不同，则说明换乘的公交线路减少了
+        p->transfer--;
+}
+
+//显示通行线路的函数
+void Show(Path *p)
+{
+    if(p->transfer<=1)
+    {
+        cout<<g_BusMap.stations[p->r[0].station].station;
+        for(int i=1;i<=p->top;i++)
+        {
+            cout<<"--"<<"["<<g_BusMap.buses[p->r[i].bus].name<<"]"<<"-->"<<g_BusMap.stations[p->r[i].station].station;
+        }
+        cout<<endl;
+        cout<<"该路线总距离："<<p->distance<<" 换乘次数："<<p->transfer<<endl<<endl;
+    }
+}
+
+//查询线路的函数
+void QueryRoutes(char *pStart,char *pEnd,Path *path)
+{
+    int nStart=GetStation(pStart);
+    int nEnd=GetStation(pEnd);
+    int n=nStart;
+    Station* pStation=&g_BusMap.stations[nStart];
+    Route*pRoute=pStation->routes;
+    if(n==nEnd)
+    {
+        Show(path);
+    }
+    else{
+    for(;pRoute!=NULL;pRoute=pRoute->next)
+    {
+        if(!visited[pRoute->station])//如果没有访问过该站点，则push进去 ，添加进入线路
+        {
+            visited[pRoute->station]=true;
+            Push(path,pRoute);
+            QueryRoutes(g_BusMap.stations[pRoute->station].station,pEnd,path);
+        }
+    }
+    }
+    //访问全部结束，将所有线路信息全部pop，访问权限都清零
+    Pop(path,pRoute);
+    visited[pRoute->station]=false;
+}

@@ -1,0 +1,6 @@
+#ifndef RESETSYSTEM_H_INCLUDED
+#define RESETSYSTEM_H_INCLUDED
+
+void ResetSystem(BusMap &Map);
+
+#endif // RESETSYSTEM_H_INCLUDED

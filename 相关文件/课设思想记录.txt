@@ -1,0 +1,132 @@
+
+2020/2/25 23：36
+寻找新增节点之后SearchBus功能障碍的原因
+出错的写文件  AddNewRoute 看看能不能用fgets fputs重写
+
+2020/2/26 8：37
+残留问题：添加路线后第二次重启邻接表出问题
+
+2020/2/26 11：54
+重新梳理了一遍代码
+修改部分：1.SearchStation中删除routes指针（可能占用空间）
+                2.SearchBus中删除buses指针（未用到，野指针）
+无法解决问题：似乎是数据太大，程序运行实现几次功能就会崩溃（无法知道情况，已经耽误两天）
+残留待解决问题：
+                1.设置路线AddNewRoute中 若路线两站点设置为公交线路起始站点 未实现（原因：buses.txt文件读写出错）
+                2.问题1导致AddNewStation中 不能将新站点设置为公交线路起始站点
+                3.AddNewRoute中没有修改routes.txt文件（感觉会出错）
+                4.bus结构中是否可以添加bus_station_num变量记录公交路线站点数（似乎多余，后续可能需要修改参数为&）
+开始实现AddNewBuses 注意读写文件问题！
+
+2020/2/26 14：25
+修复BUG： 
+             1.char *start=(char*)malloc(sizeof(char)*10);(指定大小!)
+             2.SearchBus中寻找起点站下一站的i的设置问题
+
+2020/2/26 15：57
+AddNewBus功能实现成功
+开始重写AddNewRoute 将实现 1.可以更改公交线路起点站、终点站 更改buses.txt文件内容
+                                               2.可以更改routes.txt文件内容
+
+2020/2/26 23:24
+AddNewRoute功能升级：
+           1.ChangeBusToFile 修改公交线路 buses.txt
+           2.ChangeRouteToFile 修改路线信息 routes.txt （认为以start站点为参考，如果新增线路起始站点不存在公交线路，而目标站点存在，则寻找目标站点前一路线进行修改）
+           3.AddRouteToFile  新增路线信息 分三类：A.新增路线目标战点为起点站
+                                                                        B.新增路线出发站点为终点站
+                                                                        C.新增普通中间路线
+问题： temp.txt文件无法重命名！
+
+2020/2/27 11：49
+无法解决文件重命名和移除问题
+重大决定！   重构工程，以数组读写文件形式重写！
+三大数组
+char **STATIONS[STATION_NUM] 数组
+int *ROUTES[ROUTE_NUM*4]数组
+char **BUSES[BUS_NUM]数组
+三个数组一定要注意动态分配内存！
+
+2020/2/27 21：51
+重写到目前进度已完成
+新增AddNewRoute功能：1.完成了修改和新增routes.txt文件功能
+                                      2.4种新增路线类型功能均已实现
+       flag=0: 起始站点存在公交线路中，目标站点不存在（修改邻接表、ROUTES数组，新增邻接表结点、ROUTES数组）
+       flag=1: 目标站点为当前公交线路起点站（修改公交路线、BUSES数组，新增邻接表结点、ROUTES数组）
+       flag=2: 起始站点为当前公交线路终点站（修改公交路线、BUSES数组，新增邻接表结点、ROUTES数组）
+       flag=3: 起始站点不存在公交线路中，目标站点存在（找到end前一个站点 修改邻接表、ROUTES数组，新增邻接表结点、ROUTES数组）
+                                      3.实现自动更改上下行路线功能
+                                      4.实现清屏重新操作功能
+
+2020/2/28 15：44
+在AddNewBus中 1.新增RemoveNodeToMap RemoveRouteFromArray 前提为此条路线statr-end存在
+                          2.新增ChangeNodeToMap 目前仅仅修改distance
+              思考：参数过于复杂 是否考虑传参结构体（后期修改）
+
+2020/2/28 18：17
+目前 所有添加功能均已成功实现，包含许多特殊情况，现整理相关函数:(带*说明后续功能需要继续用到，需要进一步调整）
+AddNewStation: AddNewStationToMap 实现向邻接表中新增一个站点
+AddNewBus: 1.AddNewBusToMap 实现向公交图中新增一条公交线路 busstart-busend
+                    2.AddNewBusRouteToMay 实现为新公交线路添加路段
+                    3.AddNewBusToArray 实现向BUSES数组中添加一个Bus路线 busname-busstart-busend
+                    *4.RemoveNodeToMap 实现从邻接表中删除一个节点 start-end
+                    *5.RemoveRouteFromArray 实现从ROUTES数组中删除一个路段start-end
+                    *6.ChangeNodeToMap 实现在邻接表中修改一个节点 start-end(distance)
+（实现向邻接表中新增路线 start-end 找到end2 删除start-end2 添加start-end end-end1)
+AddNewRoute 1.AddNewRouteToMap 实现向邻接表中新增路线节点
+                       2.JudegeRouteType 判断新增路线类型（四类）
+                       3.AddNewRouteToArray 向ROUTES数组中添加路线
+                       *4.ChangeBusArray 修改公交BUSES数组
+                       *5.ChangeRouteArray 修改路线ROUTES数组
+2020/2/28 23：47
+初步完成RemoveRoute功能代码 在得到STARTS和ENDS数组 后RemoveNoteToMap 功能出错
+
+2020/2/29 15：22
+完成RemoveRoute 所有上行路线删除功能
+寻找到非常隐秘BUG：
+           1. FindStationInBus 之前为寻求方便，判断station非Bus起点站或终点站时，直接从起点站pRoutes->station 开始遍历，并未判断是否为公交线路中路线 ，导致在涉及修改公交起始站点相关功能后，程序无法进行，一开始以为是编译器处理能力超过限度，可笑之极。。。
+            2.RemoveNodeToMap 改善逻辑结构，设置preRoute指针 指向删除节点前一节节 preRoute->next=pRoute->next 直接释放pRoute节点即可。 其中：如果需要删除的节点是第一条出边链域节点，则需要用 pStation->routes
+
+2020/2/29 16:40
+完善 RemoveNodeToMap  若一站点存在两个路线同时在公交线路中 需要继续遍历邻接链表找到指定删除节点
+
+2020/2/29 21：44
+1.完成RemoveRoute 上下行路线删除功能
+      RemoveRouteToMap2: 实现下行路线删除。 以修改好的上行ROUTES数组 复制至下行ROUTES数组，删除多余数组（变量num2的引入原因和k+=4的调整）
+2.遗留问题：若删除路线为 公交线路起点站—终点站 ：直接删除公交线路
+3.开始实现Removestation功能
+
+2020/2/29 23：45
+初步完成RemoveStation功能  出现问题：如果直接利用RemoveRoute功能 会多删除公交路线中一个站点
+可能需要单独写一个函数 只删除公交路线中一个站点 连接其前后站点之间路线即可。
+
+2020/3/1 13：08
+进一步完善RemoveStation功能  
+1.解决BUG：在每一次删除邻接表节点（调用RemoveNodeToMap函数之后，原调函数中pRoute指向节点已被删除）
+2.完善功能：自动删除下行路线
+3.待完善功能：完全删除station节点  从邻接表和ROUTES数组中删除 并保证原文本站点序号依然有序 
+
+2020/3/1 22：37
+1.完成RemoveBus功能 并完善RemoveRoute 如果输入删除路线为 公交线路起点站到终点站的情况
+2.目前所有删除功能均已实现完成 现整理相关函数:(带*说明后续功能需要继续用到，需要进一步调整）
+RemoveStation: 1.RemoveStationToMap 实现从邻接表中删除某一站点所有相关信息
+                         2.RemoveStationFromArray 实现从STATIONS数组中删除某一站点，并修改ROUTES数组所有站点编号，更                            新邻接表
+RemoveRoute: 1.RemoveRouteToMap 实现从邻接表中删除某一公家路线中指定起始站点到目标站点之间的路线，包含四种情                          况
+                       2.RemoveRouteToMap2 实现根据删除路线的上行路线ROUTES数组修改下行路线 并更新邻接表
+                       3.RemoveNodeToMap 实现从邻接表中删除一个节点 start-end （在实现Add功能时初步建立，在此功能中进                          一步完善 a.增加preRoute 完善删除邻接表连接功能 b.增加i!nEnd条件判断，找到完全匹配节点
+                       4.RemoveRouteFromArray 实现从ROUTES数组中删除一个路段start-end
+RemoveBus:1.RemoveBusToMap 实现从邻接表中删除指定公交路线所有路线 （为防止循环调用RemoveRouteToMap造成代                      码运行复杂程度太高，单独实现逐步删除路线，注意每一步都要修改公交起点站，并利用辅助数组routes记录路                      线修改下行路线）
+                   2.RemoveBusFromArray 实现从BUSES数组中删除某一公交路线，并修改ROUTES数组所有公交编号，更新邻接表
+3.开始实现修改功能 
+
+2020/3/2 22：18
+1.完全实现ChangeRoute功能
+2.修改 ChangeNodeToMap 和RemoveNodeToMap 两个函数，之前都是遍历公交线路找到要删除的节点，此举多余，直接定位到指定nStart所在链表进行修改和删除即可 但是不知道 之前的功能是否会受到影响，有待检测
+
+2020/3/3 23：20
+1.完全实现ChangeStation功能  稍微阻碍的小问题：每一次修改路线后，原遍历的pRoute并未更改，需要重新更新。
+2.开始实现ChangeBus功能
+
+2020/3/5 12：51
+1.完成SearchRoute 功能 重点在于 算法：有向有环图两点之间所有路径的遍历
+2.开始重头检测代码BUG
+  1.AddNewBus中 如果添加路线 起始站点已存在公交线路，目标站点不存在 此种情况程序出错
